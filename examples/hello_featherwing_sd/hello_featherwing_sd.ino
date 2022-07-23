@@ -24,6 +24,7 @@
 #include <Adafruit_LvGL_Glue_SD.h>
 #include <lvgl.h>
 #include <Adafruit_STMPE610.h>
+#include <DisplayCallbacks/DisplayCallback_SPITFT.h> // Display-specific callback
 #include <SdFat.h>
 
 #ifdef ESP32

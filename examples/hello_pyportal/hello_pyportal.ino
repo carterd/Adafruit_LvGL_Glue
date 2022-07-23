@@ -11,6 +11,8 @@
 #include <Adafruit_LvGL_Glue.h> // Always include this BEFORE lvgl.h!
 #include <lvgl.h>
 #include <TouchScreen.h>
+#include <DisplayCallbacks/DisplayCallback_SPITFT.h> // Display-specific callback
+#include <InputCallbacks/InputCallback_TouchScreen.h> // Touchscreen specific callback
 
 #define TFT_ROTATION   3 // Landscape orientation on PyPortal
 #define TFT_D0        34 // PyPortal TFT pins
@@ -59,7 +61,7 @@ void setup(void) {
   // PyPortal touchscreen needs no init
 
   // Initialize glue, passing in address of display & touchscreen
-  LvGLStatus status = glue.begin(&tft, &ts);
+  LvGLStatus status = glue.begin(&tft, displayCallback_SPITFT, (INPUT_TYPE *) &ts, inputCallback_TouchScreen, LV_INDEV_TYPE_POINTER);
   if(status != LVGL_OK) {
     Serial.printf("Glue error %d\r\n", (int)status);
     for(;;);

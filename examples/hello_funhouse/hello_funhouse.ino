@@ -7,6 +7,7 @@
 #include <Adafruit_LvGL_Glue.h> // Always include this BEFORE lvgl.h!
 #include <lvgl.h>
 #include <Adafruit_ST7789.h>
+#include <DisplayCallbacks/DisplayCallback_SPITFT.h> // Display-specific callback
 
 Adafruit_ST7789    tft(TFT_CS, TFT_DC, TFT_RESET);
 Adafruit_LvGL_Glue glue;
@@ -30,7 +31,7 @@ void setup(void) {
   digitalWrite(TFT_BACKLIGHT, HIGH);
 
   // Initialize glue, passing in address of display
-  LvGLStatus status = glue.begin(&tft);
+  LvGLStatus status = glue.begin(&tft, displayCallback_SPITFT);
   if(status != LVGL_OK) {
     Serial.printf("Glue error %d\r\n", (int)status);
     for(;;);

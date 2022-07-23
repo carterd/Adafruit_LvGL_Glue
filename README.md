@@ -18,6 +18,7 @@ docs.littlevgl.com for a thorough explanation of capabilities and use.
  * [Adafruit TouchScreen](https://github.com/adafruit/Adafruit_TouchScreen)
  * [Adafruit Zero DMA Library](https://github.com/adafruit/Adafruit_ZeroDMA)
  * [Adafruit ZeroTimer Library](https://github.com/adafruit/Adafruit_ZeroTimer)
+ * [RPI_PICO_TimerInterrupt](https://github.com/khoih-prog/RPI_PICO_TimerInterrupt)
 
 # Compatibility
 Version 2.1.0 eliminates the "widgets" examples -- only the simple "hello"

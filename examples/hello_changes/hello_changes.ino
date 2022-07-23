@@ -56,6 +56,7 @@ of UI widgets and so forth.
 #include <Adafruit_LvGL_Glue.h> // Glue library header INCLUDE THIS FIRST!
 #include <lvgl.h>               // LittlevGL header
 #include <Adafruit_ST7789.h>    // Display-specific header
+#include <DisplayCallbacks/DisplayCallback_SPITFT.h>
 
 #define TFT_CS  1 // Display chip-select pin
 #define TFT_DC  2 // Display data/command pin
@@ -70,7 +71,7 @@ void setup(void) {
   tft.init(240, 240); // Initialize display
 
   // Initialize glue, passing in address of display
-  LvGLStatus status = glue.begin(&tft);
+  LvGLStatus status = glue.begin(&tft, displayCallback_SPITFT);
   if(status != LVGL_OK) {
     Serial.printf("Glue error %d\r\n", (int)status);
     for(;;);

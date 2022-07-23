@@ -7,6 +7,7 @@
 #include <Adafruit_LvGL_Glue.h> // Always include this BEFORE lvgl.h!
 #include <lvgl.h>
 #include <Adafruit_ST7789.h>
+#include <DisplayCallbacks/DisplayCallback_SPITFT.h> // Display-specific callback
 
 #define TFT_ROTATION   2
 #define TFT_CS        A6
@@ -44,7 +45,7 @@ void setup(void) {
   analogWrite(TFT_BACKLIGHT, 255); // USE analogWrite() FOR GIZMO BACKLIGHT!
 
   // Initialize glue, passing in address of display
-  LvGLStatus status = glue.begin(&tft);
+  LvGLStatus status = glue.begin(&tft, displayCallback_SPITFT);
   if(status != LVGL_OK) {
     Serial.printf("Glue error %d\r\n", (int)status);
     for(;;);
