@@ -61,6 +61,9 @@ public:
 
   // Expose LV Display for ease of getting actual display rather than using NULL
   lv_disp_t *getLvDisplay();
+  // Expose LV InputDev for ease of getting input device
+  lv_indev_t *getLvInputDevice();
+
   // Expose the Callback functionality to the static C callback
   void displayCallback(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
   // Expose the Callback functioanlity to the static C callback

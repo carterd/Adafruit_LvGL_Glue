@@ -15,7 +15,6 @@ static uint32_t adafruitGetGlyphDscId(const lv_font_t * font, uint32_t letter)
 }
 
 bool adafruitGetGlyphDsc(const _lv_font_t * font, lv_font_glyph_dsc_t * dsc_out, uint32_t unicode_letter, uint32_t unicode_letter_next) {
-    LV_LOG_USER("adafruitGetGlyphDsc");
     bool is_tab = false;
     if(unicode_letter == '\t') {
         unicode_letter = ' ';
@@ -44,13 +43,10 @@ bool adafruitGetGlyphDsc(const _lv_font_t * font, lv_font_glyph_dsc_t * dsc_out,
 
     if(is_tab) dsc_out->box_w = dsc_out->box_w * 2;
 
-    LV_LOG_USER("unicode letter '%c'", unicode_letter);
-
     return true;
 }
 
 const uint8_t *adafruitGetGlyphBitmap(const lv_font_t * font, uint32_t unicode_letter) {
-    LV_LOG_USER("adafruitGetGlyphBitmap");
     if(unicode_letter == '\t') unicode_letter = ' ';
 
     GFXfont * fdsc = (GFXfont *)font->dsc;
@@ -62,7 +58,19 @@ const uint8_t *adafruitGetGlyphBitmap(const lv_font_t * font, uint32_t unicode_l
     return &fdsc->bitmap[gdsc->bitmapOffset];
 }
 
-bool adafruitToLvGLFont(const GFXfont *adafruitFont, lv_font_t *lvFont) {
+/**
+ * @brief This will take an adafruit GFXfont and populate the associated lv_font_t.
+ * 
+ * It should be noted that both the lvFont and adafruitFont are required to stay in memory and not
+ * be garbage collected so best to create them both static.
+ * 
+ * @param adafruitFont This is the pointer to the adafruit font structure form which to generate the lvFont
+ * @param lvFont This is the resultant lvFont which which can be used to use adafruit GFXfont in LvGL.
+ * @param lvFontFallback Possible fallback LVFont or NULL for no fallback
+ * @return true Successfully create the lvFont
+ * @return false Failure to create the lvFont
+ */
+bool adafruitToLvGLFont(const GFXfont *adafruitFont, lv_font_t *lvFont, const lv_font_t *lvFontFallback) {
     lvFont->line_height=adafruitFont->yAdvance;    
 #if !(LVGL_VERSION_MAJOR == 6 && LVGL_VERSION_MINOR == 0)
     lvFont->subpx = LV_FONT_SUBPX_NONE,
@@ -74,7 +82,7 @@ bool adafruitToLvGLFont(const GFXfont *adafruitFont, lv_font_t *lvFont) {
     lvFont->dsc = adafruitFont;
     lvFont->get_glyph_dsc = *adafruitGetGlyphDsc;
     lvFont->get_glyph_bitmap = *adafruitGetGlyphBitmap;
-    lvFont->fallback = NULL;
+    lvFont->fallback = lvFontFallback;
     
     // calculate baseline
     const GFXglyph *glyphPtr = adafruitFont->glyph;
@@ -88,7 +96,6 @@ bool adafruitToLvGLFont(const GFXfont *adafruitFont, lv_font_t *lvFont) {
         if ( descent > maxDescent) maxDescent = descent;
         int height = glyphPtr->height;
         int yoffset = glyphPtr->yOffset;
-        LV_LOG_USER("LOOKING %d %d %d",i , maxAscent, maxDescent);
         glyphPtr++;
     }
     lvFont->base_line = (lineHeight + maxDescent - maxAscent) >> 1;

@@ -74,7 +74,6 @@ static void lv_read_callback(lv_indev_drv_t *indev_drv,
   Adafruit_LvGL_Glue *glue = (Adafruit_LvGL_Glue *)indev_drv->user_data;
   DISPLAY_TYPE *display = glue->display;
   INPUT_TYPE *input = glue->input;
-
   glue->inputCallback(indev_drv, data);
 }
 
@@ -400,4 +399,8 @@ void Adafruit_LvGL_Glue::inputCallback(lv_indev_drv_t *indev_drv, lv_indev_data_
 
 lv_disp_t *Adafruit_LvGL_Glue::getLvDisplay() {
   return this->lv_disp;
+}
+
+lv_indev_t *Adafruit_LvGL_Glue::getLvInputDevice() {
+  return this->lv_input_dev_ptr;
 }

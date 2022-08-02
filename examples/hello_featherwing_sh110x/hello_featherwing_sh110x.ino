@@ -18,6 +18,7 @@
 
 #if USE_ADAFRUIT_FONT
 #include <Fonts/PixelOperator8pt7b.h>
+#include <LvglFonts/lv_font_symbols_8.h>
 #include <Utilities/Adafruit_To_LvGL_Font.h>
 #endif
 
@@ -51,9 +52,9 @@ Adafruit_LvGL_Glue glue;
 // copy-and-paste this sketch as a starting point, then embellish here:
 void lvgl_setup(void) {
 #if USE_ADAFRUIT_FONT
-  // Ensure that fonts are static otherwise, there will be problems
+  // Ensure that fonts are static otherwise, there will be problems, also use lv_font_symbols as fallback font to capture symbols
   static lv_font_t myAdaFont = {};
-  adafruitToLvGLFont(&PixelOperator8pt7b, &myAdaFont);
+  adafruitToLvGLFont(&PixelOperator8pt7b, &myAdaFont, &lv_font_symbols_8);
   // Ensure using the mono theme
   lv_theme_t* mono_theme = lv_theme_mono_init(glue.getLvDisplay(), false, &myAdaFont);
 #else
