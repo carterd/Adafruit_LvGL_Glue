@@ -19,6 +19,7 @@
 #if USE_ADAFRUIT_FONT
 #include <Fonts/PixelOperator8pt7b.h>
 #include <LvglFonts/lv_font_symbols_8.h>
+#include <LvglThemes/lv_theme_binary.h>
 #include <Utilities/Adafruit_To_LvGL_Font.h>
 #endif
 
@@ -56,12 +57,12 @@ void lvgl_setup(void) {
   static lv_font_t myAdaFont = {};
   adafruitToLvGLFont(&PixelOperator8pt7b, &myAdaFont, &lv_font_symbols_8);
   // Ensure using the mono theme
-  lv_theme_t* mono_theme = lv_theme_mono_init(glue.getLvDisplay(), false, &myAdaFont);
+  lv_theme_t* binary_theme = lv_theme_binary_init(glue.getLvDisplay(), true, &myAdaFont);
 #else
-  lv_theme_t* mono_theme = lv_theme_mono_init(glue.getLvDisplay(), false, lv_font_default());
+  lv_theme_t* binary_theme = lv_theme_binary_init(glue.getLvDisplay(), true, lv_font_default());
 #endif
   lv_disp_set_rotation(NULL, LV_DISP_ROT_90);
-  lv_disp_set_theme(NULL, mono_theme);
+  lv_disp_set_theme(NULL, binary_theme);
 
   // Create simple label centered on screen
   lv_obj_t *label = lv_label_create(lv_scr_act());

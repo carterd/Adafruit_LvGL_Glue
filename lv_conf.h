@@ -119,6 +119,7 @@
     * radius * 4 bytes are used per circle (the most often used radiuses are saved)
     * 0: to disable caching */
     #define LV_CIRCLE_CACHE_SIZE 4
+
 #endif /*LV_DRAW_COMPLEX*/
 
 /*Default image cache size. Image caching keeps the images opened.
@@ -205,7 +206,7 @@
     *LV_LOG_LEVEL_ERROR       Only critical issue, when the system may fail
     *LV_LOG_LEVEL_USER        Only logs added by the user
     *LV_LOG_LEVEL_NONE        Do not log anything*/
-    #define LV_LOG_LEVEL LV_LOG_LEVEL_USER
+    #define LV_LOG_LEVEL LV_LOG_LEVEL_NONE
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/

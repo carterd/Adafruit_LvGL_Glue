@@ -304,7 +304,7 @@ static const lv_font_fmt_txt_cmap_t cmaps_symbols_8[] = {
  *  ALL CUSTOM DATA
  *--------------------*/
 
-#if LV_VERSION_CHECK(8, 0, 0)
+#if LVGL_VERSION_MAJOR >= 8
 /*Store all the custom data of the font*/
 static  lv_font_fmt_txt_glyph_cache_t cache;
 static const lv_font_fmt_txt_dsc_t font_dsc_symbols_8 = {
@@ -320,7 +320,7 @@ static lv_font_fmt_txt_dsc_t font_dsc_symbols = {
     .bpp = 1,
     .kern_classes = 0,
     .bitmap_format = 0,
-#if LV_VERSION_CHECK(8, 0, 0)
+#if LVGL_VERSION_MAJOR >= 8
     .cache = &cache
 #endif
 };
@@ -331,10 +331,10 @@ static lv_font_fmt_txt_dsc_t font_dsc_symbols = {
  *----------------*/
 
 /*Initialize a public general font descriptor*/
-#if LV_VERSION_CHECK(8, 0, 0)
+#if LVGL_VERSION_MAJOR >= 8
 const lv_font_t lv_font_symbols_8 = {
 #else
-lv_font_t lv_font_montserrat_8 = {
+lv_font_t lv_font_symbols_8 = {
 #endif
     .get_glyph_dsc = lv_font_get_glyph_dsc_fmt_txt,    /*Function pointer to get glyph's data*/
     .get_glyph_bitmap = lv_font_get_bitmap_fmt_txt,    /*Function pointer to get glyph's bitmap*/
