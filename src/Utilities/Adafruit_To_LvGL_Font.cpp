@@ -35,8 +35,7 @@ bool adafruitGetGlyphDsc(const _lv_font_t * font, lv_font_glyph_dsc_t * dsc_out,
     dsc_out->box_h = gdsc->height;
     dsc_out->box_w = gdsc->width;
     dsc_out->ofs_x = gdsc->xOffset;
-    dsc_out->ofs_y = gdsc->yOffset;
-    dsc_out->ofs_y = -(gdsc->yOffset + gdsc->height);
+    dsc_out->ofs_y = 1 - (gdsc->yOffset + gdsc->height);
 
     dsc_out->bpp   = 1;
     dsc_out->is_placeholder = false;
