@@ -1,3 +1,5 @@
+#include "Adafruit_GFX.h"
+
 /**
  * @file PixelOperator8pt7b.h
  * @author Jayvee Enaguas
