@@ -1,4 +1,4 @@
-#ifndef _ADAFRUIT_LVGL_GLUE_H_
+﻿#ifndef _ADAFRUIT_LVGL_GLUE_H_
 #define _ADAFRUIT_LVGL_GLUE_H_
 
 class Adafruit_LvGL_Glue;

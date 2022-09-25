@@ -1,4 +1,4 @@
-/*********************
+﻿/*********************
  *      INCLUDES
  *********************/
 #include <lvgl.h>
@@ -97,58 +97,6 @@
 #define LABEL_ANIM_SPEED    10
 #define DEFAULT_ANIM_SPEED  1
 
-/**********************
- *      TYPEDEFS
- **********************/
-typedef struct {
-    lv_style_t scr;
-    lv_style_t card;
-    lv_style_t scrollbar;
-    lv_style_t inv;
-    lv_style_t disabled;
-    lv_style_t focus;
-    lv_style_t edit;
-    lv_style_t pad_zero;
-    lv_style_t no_radius;
-    lv_style_t radius_circle;
-
-    lv_style_t window;
-
-    lv_style_t matrix;
-
-    lv_style_t calender;
-
-    lv_style_t arc;
-    lv_style_t arc_indicator;
-    lv_style_t arc_knob;
-
-    lv_style_t spinner;
-    lv_style_t spinner_indicator;
-
-    lv_style_t slider;
-    lv_style_t slider_focus;
-    lv_style_t slider_knob;
-    lv_style_t slider_knob_edit;
-    lv_style_t slider_indicator;
-
-    lv_style_t checkbox;
-    lv_style_t checkbox_checked;
-
-    lv_style_t button;
-    lv_style_t button_focus;
-    lv_style_t button_checked;
-    lv_style_t button_pressed;
-
-    lv_style_t list;
-    lv_style_t list_button;
-    lv_style_t list_button_focus;
-    lv_style_t list_scrollbar;
-    lv_style_t slow_label;
-
-#if LV_USE_TEXTAREA
-    lv_style_t ta_cursor;
-#endif
-} theme_binary_styles_t;
 
 
 /**********************
@@ -174,11 +122,6 @@ static bool inited;
 
 static void style_init(bool dark_bg, const lv_font_t* font)
 {
-    // ScrollBar
-    style_init_reset(&binary_styles->scrollbar);
-    lv_style_set_bg_opa(&binary_styles->scrollbar, LV_OPA_COVER);
-    lv_style_set_bg_color(&binary_styles->scrollbar, COLOR_FG);
-    lv_style_set_width(&binary_styles->scrollbar, SCROLL_WIDTH);
 
     // Screen
     style_init_reset(&binary_styles->scr);
@@ -233,6 +176,21 @@ static void style_init(bool dark_bg, const lv_font_t* font)
 
 
     lv_style_t* sp;
+
+    // ScrollBar
+    //---------------------------------------------------------------------------------------------
+
+    // On ScrollBar
+    sp = &binary_styles->scrollbar;
+    style_init_reset(sp);
+    lv_style_set_bg_opa(sp, LV_OPA_COVER);
+    lv_style_set_bg_color(sp, COLOR_FG);
+    lv_style_set_width(sp, SCROLL_WIDTH);
+    // Off ScrollBar
+    sp = &binary_styles->no_scrollbar;
+    style_init_reset(sp);
+    lv_style_set_width(sp, 0);
+
 
     // Card Style
     //---------------------------------------------------------------------------------------------
@@ -514,6 +472,15 @@ static void style_init(bool dark_bg, const lv_font_t* font)
     lv_style_set_outline_color(sp, COLOR_BG);
     lv_style_set_border_color(sp, COLOR_FG);
 
+    // Button No Highlight (no borders)
+    sp = &binary_styles->button_no_highlight;
+    style_init_reset(sp);
+    lv_style_set_outline_width(sp, 0);                          // Outline width    +===================+
+    lv_style_set_outline_pad(sp, 0);                            // Outline pad      |                   |
+    lv_style_set_border_width(sp, 0);                           // Border width     |  +=============+  |
+    lv_style_set_pad_all(sp, 0);                                // Pad all          |  |             |  |
+    lv_style_set_pad_gap(sp, 0);                                // Pad gap          |  | XXXXX XXXXX |  |
+
     // List Style
     //---------------------------------------------------------------------------------------------
     sp = &binary_styles->list;
@@ -523,8 +490,8 @@ static void style_init(bool dark_bg, const lv_font_t* font)
     lv_style_set_outline_width(sp, LIST_OUTLINE_WIDTH);      // Outline width    +===================+
     lv_style_set_outline_pad(sp, LIST_OUTLINE_PAD);          // Outline pad      |                   |
     lv_style_set_border_width(sp, LIST_BORDER_WIDTH);        // Border width     |  +=============+  |
-    lv_style_set_pad_all(sp, PAD_DEF);                       // Pad all          |  |             |  |
-    lv_style_set_pad_gap(sp, PAD_DEF);                       // Pad gap          |  | XXXXX XXXXX |  |
+    lv_style_set_pad_all(sp, 0);                             // Pad all          |  |             |  |
+    lv_style_set_pad_gap(sp, 0);                             // Pad gap          |  | XXXXX XXXXX |  |
 
     lv_style_set_radius(sp, 0);                              // Widget Radius
     lv_style_set_line_width(sp, 1);                          // Line Widths
@@ -616,6 +583,7 @@ lv_theme_t* lv_theme_binary_init(lv_disp_t* disp, bool dark_bg, const lv_font_t*
     binary_theme.font_normal = LV_FONT_DEFAULT;
     binary_theme.font_large = LV_FONT_DEFAULT;
     binary_theme.apply_cb = theme_apply;
+    binary_theme.user_data = binary_styles;
 
     style_init(dark_bg, font);
 
@@ -672,8 +640,8 @@ static void theme_apply(lv_theme_t* th, lv_obj_t* obj)
             return;
         }
 #endif
-        lv_obj_add_style(obj, &binary_styles->card, LV_PART_MAIN);
-        lv_obj_add_style(obj, &binary_styles->scrollbar, LV_PART_SCROLLBAR);
+        //lv_obj_add_style(obj, &binary_styles->card, LV_PART_MAIN);
+        //lv_obj_add_style(obj, &binary_styles->scrollbar, LV_PART_SCROLLBAR);
     }
 #if LV_USE_BTN
     else if (lv_obj_check_type(obj, &lv_btn_class)) {
