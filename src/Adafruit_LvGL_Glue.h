@@ -10,7 +10,7 @@ class Adafruit_LvGL_Glue;
 #elif defined(ESP32)
 #include <Ticker.h> // ESP32-specific timer lib
 #elif defined(ARDUINO_ARCH_RP2040)
-#include <MBED_RPi_Pico_TimerInterrupt.hpp> // PICO Timer lib
+// Nothing here
 #endif
 
 class INPUT_TYPE;
@@ -83,14 +83,7 @@ private:
   lv_indev_t *lv_input_dev_ptr;
   DisplayCallback displayCallbackFunc;
   InputCallback inputCallbackFunc;
-#if defined(ARDUINO_ARCH_SAMD)
-  Adafruit_ZeroTimer *zerotimer;
-#elif defined(ESP32)
-  Ticker tick;
-#elif defined(ARDUINO_ARCH_RP2040)
-  MBED_RPI_PICO_Timer *picoTimer;
-#elif defined(NRF52_SERIES)
-#endif
+  void *tickerIntTimer; ///< Archetecutre independant pointer to some kind of ticker timer implementation
 };
 
 #endif // _ADAFRUIT_LVGL_GLUE_H_

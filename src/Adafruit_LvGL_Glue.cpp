@@ -1,4 +1,5 @@
 #include "Adafruit_LvGL_Glue.h"
+#include "Adafruit_LvGL_Tick_Inc.h"
 #include <lvgl.h>
 
 lv_disp_draw_buf_t Adafruit_LvGL_Glue::lv_disp_draw_buf;
@@ -11,59 +12,6 @@ lv_disp_t *Adafruit_LvGL_Glue::lv_disp;
 
 // Tick interval for LittlevGL internal timekeeping; 1 to 10 ms recommended
 static const int lv_tick_interval_ms = 10;
-
-#if defined(ARDUINO_ARCH_SAMD) // --------------------------------------
-
-// Because of the way timer/counters are paired, and because parallel TFT
-// uses timer 2 for write strobe, this needs to use timer 4 or above...
-#define TIMER_NUM 4
-#define TIMER_ISR TC4_Handler
-
-// Interrupt service routine for zerotimer object
-void TIMER_ISR(void) { Adafruit_ZeroTimer::timerHandler(TIMER_NUM); }
-
-// Timer compare match 0 callback -- invokes LittlevGL timekeeper.
-static void timerCallback0(void) { lv_tick_inc(lv_tick_interval_ms); }
-
-#elif defined(ESP32) // ------------------------------------------------
-
-static void lv_tick_handler(void) { lv_tick_inc(lv_tick_interval_ms); }
-
-#elif defined(NRF52_SERIES) // -----------------------------------------
-
-#define TIMER_ID NRF_TIMER4
-#define TIMER_IRQN TIMER4_IRQn
-#define TIMER_ISR TIMER4_IRQHandler
-#define TIMER_FREQ 16000000
-
-extern "C" {
-// Timer interrupt service routine
-void TIMER_ISR(void) {
-  if (TIMER_ID->EVENTS_COMPARE[0]) {
-    TIMER_ID->EVENTS_COMPARE[0] = 0;
-  }
-  lv_tick_inc(lv_tick_interval_ms);
-}
-}
-
-#elif defined(ARDUINO_ARCH_RP2040)
-
-#include <MBED_RPi_Pico_TimerInterrupt.h>
-#define TIMER_NUM TIMER_IRQ_3
-
-// Timer interrupt service routine
-void PIC_TIMER_HANDLER(uint alarm_num)
-{ 
-  // Always call this for MBED RP2040 before processing ISR
-  TIMER_ISR_START(alarm_num);
-
-  // Flag for checking to be sure ISR is working as Serial.print is not OK here in ISR
-  lv_tick_inc(lv_tick_interval_ms);
-
-  // Always call this for MBED RP2040 after processing ISR
-  TIMER_ISR_END(alarm_num);
-}
-#endif
 
 // INPUT STUFF -------------------------------------------------------------
 
@@ -123,11 +71,7 @@ static void lv_debug(const char *buf) { Serial.println(buf); }
  */
 Adafruit_LvGL_Glue::Adafruit_LvGL_Glue(void)
     : first_frame(true) , displayCallbackFunc(NULL), inputCallbackFunc(NULL) {
-#if defined(ARDUINO_ARCH_SAMD)
-  zerotimer = NULL;
-#elif defined(ARDUINO_ARCH_RP2040)
-  picoTimer = NULL;
-#endif
+  tickerIntTimer = NULL;
 }
 
 // Destructor
@@ -138,12 +82,9 @@ Adafruit_LvGL_Glue::Adafruit_LvGL_Glue(void)
  */
 Adafruit_LvGL_Glue::~Adafruit_LvGL_Glue(void) {
   delete[] lv_pixel_buf;
-#if defined(ARDUINO_ARCH_SAMD)
-  delete zerotimer;
-#elif defined(ARDUINO_ARCH_RP2040)
-  delete picoTimer;
-#endif
-  // Probably other stuff that could be deallocated here
+  // Make any clean-up of timer information
+  if (tickerIntTimer)
+    endTickIncTimer(tickerIntTimer);
 }
 
 // begin() function is overloaded for STMPE610 touch, ADC touch, or none.
@@ -275,99 +216,26 @@ LvGLStatus Adafruit_LvGL_Glue::begin(DISPLAY_TYPE *display, DisplayCallback disp
 
     // TIMER SETUP is architecture-specific ----------------------------
 
-#if defined(ARDUINO_ARCH_RP2040)
+    /*
     if ((picoTimer = new MBED_RPI_PICO_Timer(TIMER_NUM))) {
-      if (((MBED_RPI_PICO_Timer*) picoTimer)->attachInterruptInterval(lv_tick_interval_ms * 1000, PIC_TIMER_HANDLER))
+      if ((picoTimer)->attachInterruptInterval(lv_tick_interval_ms * 1000, PIC_TIMER_HANDLER))
       {
         status = LVGL_OK;
       }
     }
-#elif defined(ARDUINO_ARCH_SAMD) // --------------------------------------
-
-    // status is still ERR_ALLOC until proven otherwise...
-    if ((zerotimer = new Adafruit_ZeroTimer(TIMER_NUM))) {
-      uint16_t divider = 1;
-      uint16_t compare = 0;
-      tc_clock_prescaler prescaler = TC_CLOCK_PRESCALER_DIV1;
-
-      status = LVGL_OK; // We're prob good now, but one more test...
-
-      int freq = 1000 / lv_tick_interval_ms;
-
-      if ((freq < (48000000 / 2)) && (freq > (48000000 / 65536))) {
-        divider = 1;
-        prescaler = TC_CLOCK_PRESCALER_DIV1;
-      } else if (freq > (48000000 / 65536 / 2)) {
-        divider = 2;
-        prescaler = TC_CLOCK_PRESCALER_DIV2;
-      } else if (freq > (48000000 / 65536 / 4)) {
-        divider = 4;
-        prescaler = TC_CLOCK_PRESCALER_DIV4;
-      } else if (freq > (48000000 / 65536 / 8)) {
-        divider = 8;
-        prescaler = TC_CLOCK_PRESCALER_DIV8;
-      } else if (freq > (48000000 / 65536 / 16)) {
-        divider = 16;
-        prescaler = TC_CLOCK_PRESCALER_DIV16;
-      } else if (freq > (48000000 / 65536 / 64)) {
-        divider = 64;
-        prescaler = TC_CLOCK_PRESCALER_DIV64;
-      } else if (freq > (48000000 / 65536 / 256)) {
-        divider = 256;
-        prescaler = TC_CLOCK_PRESCALER_DIV256;
-      } else {
-        status = LVGL_ERR_TIMER; // Invalid frequency
-      }
-
-      if (status == LVGL_OK) {
-        compare = (48000000 / divider) / freq;
-        // Initialize timer
-        zerotimer->configure(prescaler, TC_COUNTER_SIZE_16BIT,
-                             TC_WAVE_GENERATION_MATCH_PWM);
-        zerotimer->setCompare(0, compare);
-        zerotimer->setCallback(true, TC_CALLBACK_CC_CHANNEL0, timerCallback0);
-        zerotimer->enable(true);
-      }
-    }
-
-#elif defined(ESP32) // ------------------------------------------------
-
-    tick.attach_ms(lv_tick_interval_ms, lv_tick_handler);
-    status = LVGL_OK;
-
-#elif defined(NRF52_SERIES) // -----------------------------------------
-
-  TIMER_ID->TASKS_STOP = 1;               // Stop timer
-  TIMER_ID->MODE = TIMER_MODE_MODE_Timer; // Not counter mode
-  TIMER_ID->TASKS_CLEAR = 1;
-  TIMER_ID->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
-  TIMER_ID->PRESCALER = 0; // 1:1 prescale (16 MHz)
-  TIMER_ID->INTENSET = TIMER_INTENSET_COMPARE0_Enabled
-                       << TIMER_INTENSET_COMPARE0_Pos; // Event 0 int
-  TIMER_ID->CC[0] = TIMER_FREQ / (lv_tick_interval_ms * 1000);
-
-  NVIC_DisableIRQ(TIMER_IRQN);
-  NVIC_ClearPendingIRQ(TIMER_IRQN);
-  NVIC_SetPriority(TIMER_IRQN, 2); // Lower priority than soft device
-  NVIC_EnableIRQ(TIMER_IRQN);
-
-  TIMER_ID->TASKS_START = 1; // Start timer
-
-  status = LVGL_OK;
-
-#endif // end timer setup --------------------------------------------------
+    */
+   if (tickerIntTimer = startTickIncTimer(this, lv_tick_interval_ms, lv_tick_inc)) {
+     status = LVGL_OK;
+   }
   }
 
   if (status != LVGL_OK) {
     delete[] lv_pixel_buf;
     lv_pixel_buf = NULL;
-#if defined(ARDUINO_ARCH_RP2040)
-    delete picoTimer;
-    picoTimer = NULL;
-#elif defined(ARDUINO_ARCH_SAMD)
-    delete zerotimer;
-    zerotimer = NULL;
-#endif
+    
+    if (tickerIntTimer)
+      endTickIncTimer(tickerIntTimer);
+    tickerIntTimer = NULL;
   }
 
   return status;
