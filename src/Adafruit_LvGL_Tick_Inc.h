@@ -31,8 +31,4 @@ bool endTickIncTimer(void* tickerIncTimerPtr);
  */
 extern bool tickIncTimerError;
 
-extern uint64_t _timer_values_now;
-extern uint64_t _timer_values_new_alarm;
-extern uint64_t _timer_values_later;
-
 #endif
