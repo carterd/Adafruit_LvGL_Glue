@@ -1,6 +1,6 @@
 #if defined(ARDUINO_ARCH_RP2040)
 
-#include "..\Adafruit_LvGL_Tick_Inc.h"
+#include "../Adafruit_LvGL_Tick_Inc.h"
 #include <MBED_RPi_Pico_TimerInterrupt.h>
 
 #define TIMER_NUM TIMER_IRQ_0
