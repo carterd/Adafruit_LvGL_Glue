@@ -27,8 +27,9 @@ static void lv_read_callback(lv_indev_drv_t *indev_drv,
 
 // OTHER LITTLEVGL VITALS --------------------------------------------------
 
-#if LV_COLOR_DEPTH != 16
-#pragma error("LV_COLOR_DEPTH must be 16")
+#if LV_COLOR_DEPTH != 16 && LV_COLOR_DEPTH != 8
+#pragma error("LV_COLOR_DEPTH must be 16 or 8")
+#error LV_COLOR_DEPTH must be 16 or 8
 #endif
 // This isn't necessarily true, don't mention it for now. See notes later.
 //#if LV_COLOR_16_SWAP != 0
@@ -58,7 +59,12 @@ static void lv_flush_callback(lv_disp_drv_t *disp_drv, const lv_area_t *area,
 #if (LV_USE_LOG)
 // Optional LittlevGL debug print function, writes to Serial if debug is
 // enabled when calling glue begin() function.
+#if LVGL_DEBUG_VERSION_COMPATABILITY_UPTO_8_3_4 == 1
 static void lv_debug(const char *buf) { Serial.println(buf); }
+#endif
+#if LVGL_DEBUG_VERSION_COMPATABILITY_ABOVE_8_3_4 == 1
+static void lv_debug(lv_log_level_t level, const char *buf) { Serial.println(buf); }
+#endif
 #endif
 
 // GLUE LIB FUNCTIONS ------------------------------------------------------

@@ -1,6 +1,9 @@
 ﻿#ifndef _ADAFRUIT_LVGL_GLUE_H_
 #define _ADAFRUIT_LVGL_GLUE_H_
 
+#define LVGL_DEBUG_VERSION_COMPATABILITY_UPTO_8_3_4  1
+#define LVGL_DEBUG_VERSION_COMPATABILITY_ABOVE_8_3_4 0
+
 class Adafruit_LvGL_Glue;
 
 #include <lvgl.h>              // LittlevGL core lib
